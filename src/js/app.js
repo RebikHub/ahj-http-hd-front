@@ -1,7 +1,9 @@
-import Widget from './widget';
+// import Widget from './widget';
 
-console.log('app started');
+// const conteiner = new Widget();http://httpbin.org/
 
-const conteiner = new Widget();
-
-conteiner.events();
+// conteiner.events();https://rebikhub-http.herokuapp.com/
+const url = 'https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits';
+fetch(url, { mode: 'no-cors' })
+  .then((response) => console.log(response.json()))
+  .then((data) => console.log(data));
