@@ -17,10 +17,11 @@ export default class Widget {
     this.shortText = null;
     this.longText = null;
     this.date = null;
+    this.done = false;
   }
 
   events(tickets) {
-    // this.renderTickets(tickets);
+    this.renderTickets(tickets);
     this.addTicketClick();
     this.addTicketCancel();
     this.addTicketOk();
@@ -34,9 +35,12 @@ export default class Widget {
     this.showDescription();
   }
 
-  // renderTickets(tickets) {
-
-  // }
+  async renderTickets(tickets) {
+    const ticket = await tickets;
+    console.log(ticket);
+    this.updateRender(ticket.name, ticket.description, ticket.created, ticket.status);
+    // console.log(ticket.name, ticket.description, ticket.created, ticket.status);
+  }
 
   addTicketClick() {
     this.addTicketBtn.addEventListener('click', () => {
@@ -63,24 +67,30 @@ export default class Widget {
     this.btnOk.addEventListener('click', () => {
       if (!this.popup.classList.contains('none') && this.titlePopup.textContent === 'Добавить тикет') {
         this.popup.classList.add('none');
-        this.newAddTicket(this.shortText, this.longText);
         this.ticketDate();
-        this.updateRender();
-        this.date = null;
+        this.updateRender(this.shortText, this.longText, this.date);
+        this.newAddTicket(this.shortText, this.longText, this.date, this.done);
         this.inputShortText.value = null;
         this.inputLongText.value = null;
         this.shortText = null;
         this.longText = null;
+        this.date = null;
       }
       if (!this.popup.classList.contains('none') && this.titlePopup.textContent === 'Изменить тикет') {
         this.popup.classList.add('none');
         this.delOrEditMain.children[0].children[1].textContent = this.shortText;
         this.delOrEditMain.children[1].textContent = this.longText;
-        this.newAddTicket(this.shortText, this.longText);
+        this.delOrEditMain.children[0].children[2].textContent = this.date;
+        if (this.delOrEditMain.children[0].children[0].classList.contains('done')) {
+          this.done = true;
+        }
+        this.newAddTicket(this.shortText, this.longText, this.date, this.done);
         this.inputShortText.value = null;
         this.inputLongText.value = null;
         this.shortText = null;
         this.longText = null;
+        this.date = null;
+        this.done = false;
       }
     });
   }
@@ -107,7 +117,7 @@ export default class Widget {
     this.date = `${day}.${month}.${String(year).slice(2)} ${hours}:${minute}`;
   }
 
-  updateRender() {
+  updateRender(shortText, longText, date, done) {
     const main = document.createElement('div');
     const block = document.createElement('div');
     const long = document.createElement('div');
@@ -118,22 +128,31 @@ export default class Widget {
       inMain.classList.add('in-main');
       main.appendChild(inMain);
     }
+    if (done === true) {
+      main.children[0].classList.add('done');
+    }
     main.children[0].classList.add('status');
-    main.children[1].textContent = this.shortText;
+    main.children[1].textContent = shortText;
     main.children[1].classList.add('short');
-    main.children[2].textContent = this.date;
+    main.children[2].textContent = date;
     main.children[2].classList.add('date');
     main.children[3].classList.add('edit');
     main.children[4].classList.add('delete');
-    long.textContent = this.longText;
+    long.textContent = longText;
     long.classList.add('long', 'none');
     block.appendChild(main);
     block.appendChild(long);
     this.container.appendChild(block);
   }
 
-  newAddTicket(shortText, longText) {
-    new Memory(shortText, longText);
+  static newAddTicket(shortText, longText, date, done) {
+    const ticket = {
+      name: shortText,
+      description: longText,
+      created: date,
+      status: done,
+    };
+    Memory.save(ticket);
   }
 
   statusDone() {
@@ -177,7 +196,6 @@ export default class Widget {
         this.delOrEditMain = ev.target.closest('.block');
         this.inputShortText.value = this.delOrEditMain.children[0].children[1].textContent;
         this.inputLongText.value = this.delOrEditMain.children[1].textContent;
-        console.log(this.inputShortText.value, this.inputLongText.value);
       }
     });
   }

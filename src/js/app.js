@@ -6,4 +6,4 @@ console.log('app started');
 const conteiner = new Widget();
 const tickets = new Memory();
 // console.log(tickets.load());
-conteiner.events(tickets);
+conteiner.events(tickets.load());
