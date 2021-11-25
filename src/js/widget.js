@@ -1,7 +1,6 @@
-import Memory from './memory';
-
 export default class Widget {
-  constructor() {
+  constructor(memory) {
+    this.memory = memory;
     this.container = document.querySelector('#container');
     this.addTicketBtn = document.querySelector('.add-ticket');
     this.popup = document.querySelector('#pop-up');
@@ -20,8 +19,8 @@ export default class Widget {
     this.done = false;
   }
 
-  events(tickets) {
-    this.renderTickets(tickets);
+  events() {
+    this.renderTickets();
     this.addTicketClick();
     this.addTicketCancel();
     this.addTicketOk();
@@ -32,14 +31,20 @@ export default class Widget {
     this.deleteTicketCancel();
     this.deleteTicketOk();
     this.editTicket();
-    this.showDescription();
+    this.shortTextClick();
   }
 
-  async renderTickets(tickets) {
-    const ticket = await tickets;
-    console.log(ticket);
-    this.updateRender(ticket.name, ticket.description, ticket.created, ticket.status);
-    // console.log(ticket.name, ticket.description, ticket.created, ticket.status);
+  async renderTickets() {
+    const ticket = await this.memory.load();
+    for (const i of ticket) {
+      this.updateRender(i.name, i.created, i.status, i.id);
+    }
+  }
+
+  clearDom() {
+    for (const i of this.container.querySelectorAll('.block')) {
+      i.remove();
+    }
   }
 
   addTicketClick() {
@@ -68,7 +73,6 @@ export default class Widget {
       if (!this.popup.classList.contains('none') && this.titlePopup.textContent === 'Добавить тикет') {
         this.popup.classList.add('none');
         this.ticketDate();
-        this.updateRender(this.shortText, this.longText, this.date);
         this.newAddTicket(this.shortText, this.longText, this.date, this.done);
         this.inputShortText.value = null;
         this.inputLongText.value = null;
@@ -78,13 +82,13 @@ export default class Widget {
       }
       if (!this.popup.classList.contains('none') && this.titlePopup.textContent === 'Изменить тикет') {
         this.popup.classList.add('none');
-        this.delOrEditMain.children[0].children[1].textContent = this.shortText;
-        this.delOrEditMain.children[1].textContent = this.longText;
-        this.delOrEditMain.children[0].children[2].textContent = this.date;
         if (this.delOrEditMain.children[0].children[0].classList.contains('done')) {
           this.done = true;
         }
-        this.newAddTicket(this.shortText, this.longText, this.date, this.done);
+        const { id } = this.delOrEditMain.dataset;
+        this.shortText = this.inputShortText.value;
+        this.longText = this.inputLongText.value;
+        this.newAddTicket(this.shortText, this.longText, this.date, this.done, id);
         this.inputShortText.value = null;
         this.inputLongText.value = null;
         this.shortText = null;
@@ -117,11 +121,12 @@ export default class Widget {
     this.date = `${day}.${month}.${String(year).slice(2)} ${hours}:${minute}`;
   }
 
-  updateRender(shortText, longText, date, done) {
+  updateRender(shortText, date, done, id) {
     const main = document.createElement('div');
     const block = document.createElement('div');
     const long = document.createElement('div');
     block.classList.add('block');
+    block.dataset.id = id;
     main.classList.add('main');
     for (let i = 0; i < 5; i += 1) {
       const inMain = document.createElement('div');
@@ -134,25 +139,28 @@ export default class Widget {
     main.children[0].classList.add('status');
     main.children[1].textContent = shortText;
     main.children[1].classList.add('short');
+    main.children[1].dataset.id = id;
     main.children[2].textContent = date;
     main.children[2].classList.add('date');
     main.children[3].classList.add('edit');
     main.children[4].classList.add('delete');
-    long.textContent = longText;
     long.classList.add('long', 'none');
     block.appendChild(main);
     block.appendChild(long);
     this.container.appendChild(block);
   }
 
-  static newAddTicket(shortText, longText, date, done) {
+  async newAddTicket(shortText, longText, date, done, id) {
+    this.clearDom();
     const ticket = {
       name: shortText,
       description: longText,
       created: date,
       status: done,
     };
-    Memory.save(ticket);
+    if (id) ticket.id = id;
+    await this.memory.save(ticket);
+    this.renderTickets();
   }
 
   statusDone() {
@@ -184,6 +192,7 @@ export default class Widget {
     this.btnDelOk.addEventListener('click', () => {
       this.popupDelete.classList.add('none');
       this.delOrEditMain.remove();
+      this.memory.deleteId(this.delOrEditMain.querySelector('.short').dataset.id);
       this.delOrEditMain = null;
     });
   }
@@ -194,23 +203,33 @@ export default class Widget {
         this.titlePopup.textContent = 'Изменить тикет';
         this.popup.classList.remove('none');
         this.delOrEditMain = ev.target.closest('.block');
+        const { id } = this.delOrEditMain.dataset;
         this.inputShortText.value = this.delOrEditMain.children[0].children[1].textContent;
-        this.inputLongText.value = this.delOrEditMain.children[1].textContent;
+        this.showDescription(id, this.inputLongText); // upload desc
       }
     });
   }
 
-  showDescription() {
+  shortTextClick() {
     this.container.addEventListener('click', (ev) => {
-      if (ev.target.classList.contains('short')) {
+      if (ev.target.classList.contains('short') && ev.target.closest('.block').children[1].textContent !== '') {
         const long = ev.target.closest('.block').children[1];
-        if (long.classList.contains('none')) {
-          long.classList.remove('none');
-        } else {
-          long.classList.add('none');
-        }
+        long.textContent = '';
+        long.classList.add('none');
+      } else if (ev.target.classList.contains('short')) {
+        const long = ev.target.closest('.block').children[1];
+        const { id } = ev.target.dataset;
+        this.showDescription(id, long);
+        long.classList.remove('none');
       }
     });
+  }
+
+  async showDescription(id, div) {
+    const description = await this.memory.loadId(id);
+    const text = div;
+    text.value = description;
+    text.textContent = description;
   }
 
   inputShortTicket() {

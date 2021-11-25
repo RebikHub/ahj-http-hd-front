@@ -3,7 +3,7 @@ import Memory from './memory';
 
 console.log('app started');
 
-const conteiner = new Widget();
-const tickets = new Memory();
-// console.log(tickets.load());
-conteiner.events(tickets.load());
+const memory = new Memory();
+const conteiner = new Widget(memory);
+
+conteiner.events();
