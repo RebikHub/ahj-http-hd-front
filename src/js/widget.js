@@ -130,7 +130,6 @@ export default class Widget {
     main.classList.add('main');
     for (let i = 0; i < 5; i += 1) {
       const inMain = document.createElement('div');
-      inMain.classList.add('in-main');
       main.appendChild(inMain);
     }
     if (done === true) {
@@ -167,8 +166,12 @@ export default class Widget {
     this.container.addEventListener('click', (ev) => {
       if (ev.target.classList.contains('status') && ev.target.classList.contains('done')) {
         ev.target.classList.remove('done');
+        const { id } = ev.target.closest('.block').dataset;
+        this.memory.editStatusId(id);
       } else if (ev.target.classList.contains('status')) {
         ev.target.classList.add('done');
+        const { id } = ev.target.closest('.block').dataset;
+        this.memory.editStatusId(id);
       }
     });
   }
@@ -205,7 +208,7 @@ export default class Widget {
         this.delOrEditMain = ev.target.closest('.block');
         const { id } = this.delOrEditMain.dataset;
         this.inputShortText.value = this.delOrEditMain.children[0].children[1].textContent;
-        this.showDescription(id, this.inputLongText); // upload desc
+        this.showDescription(id, this.inputLongText); // upload description
       }
     });
   }

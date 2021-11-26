@@ -38,10 +38,6 @@ body {
     border: 1px solid black;
 }
 
-.in-main {
-
-}
-
 .add-ticket {
     border: 1px solid black;
     width: 115px;
@@ -120,13 +116,15 @@ body {
 }
 
 .input-short-text {
-    width: 98.5%;
+    padding-left: 5px;
+    width: 98%;
     border-radius: 5px;
     border: 1px solid black;
 }
 
 .input-long-text {
-    width: 98.5%;
+    padding-left: 5px;
+    width: 98%;
     border-radius: 5px;
     border: 1px solid black;
     resize: none;

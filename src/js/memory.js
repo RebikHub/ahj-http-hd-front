@@ -1,9 +1,10 @@
 export default class Memory {
   constructor() {
-    this.url = 'http://localhost:3333';
+    this.url = 'https://rebikhub-http.herokuapp.com';
     this.getAllTickets = '?allTickets';
     this.getId = '?ticketById&id=';
     this.getIdDelete = '?deleteId&id='; // <id>
+    this.getStatusId = '?statusId&id=';
     this.postCreate = '?createTicket';
   }
 
@@ -41,6 +42,17 @@ export default class Memory {
   async deleteId(id) {
     try {
       const response = await fetch(`${this.url}${this.getIdDelete}${id}`);
+      const result = await response.text();
+      return result;
+    } catch (error) {
+      const err = new Error(error);
+      return err;
+    }
+  }
+
+  async editStatusId(id) {
+    try {
+      const response = await fetch(`${this.url}${this.getStatusId}${id}`);
       const description = await response.text();
       return description;
     } catch (error) {
