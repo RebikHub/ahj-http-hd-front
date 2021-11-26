@@ -1,11 +1,11 @@
 export default class Memory {
   constructor() {
     this.url = 'https://rebikhub-http.herokuapp.com';
-    this.getAllTickets = '?allTickets';
-    this.getId = '?ticketById&id=';
-    this.getIdDelete = '?deleteId&id='; // <id>
-    this.getStatusId = '?statusId&id=';
-    this.postCreate = '?createTicket';
+    this.getAllTickets = '?method=allTickets';
+    this.getId = '?method=ticketById&id=';
+    this.getIdDelete = '?method=deleteId&id='; // <id>
+    this.getStatusId = '?method=statusId&id=';
+    this.postCreate = '?method=createTicket';
   }
 
   async save(ticket) {
