@@ -1,6 +1,6 @@
 export default class Memory {
   constructor() {
-    this.url = 'https://rebikhub-http.herokuapp.com';
+    this.url = 'https://ahj-helpdesk-http.herokuapp.com';
     this.getAllTickets = '?method=allTickets';
     this.getId = '?method=ticketById&id=';
     this.getIdDelete = '?method=deleteId&id='; // <id>
